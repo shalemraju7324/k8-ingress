@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: app1
-        image: shalemdev/app1:1.0.0
+        image: joindevops/app1:1.0.0
         ports:
         - containerPort: 80
 ---
@@ -32,3 +32,27 @@ spec:
   - protocol: TCP
     port: 80 # service port
     targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app1
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:346698404665:certificate/5fb812e3-f2cb-4c63-a812-7159e173f503
+    alb.ingress.kubernetes.io/group.name: joindevops
+spec:
+  ingressClassName: alb
+  rules:
+  - host: "app1.shalem.site"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: app1
+            port:
+              number: 80
